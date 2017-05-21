@@ -25,7 +25,9 @@
     "body-parser": "^1.17.1",
     "core-js": "^2.4.1",
     "express": "^4.15.3",
+    "mongoose": "^4.10.0",
     "rxjs": "^5.0.1",
+    "toastr": "^2.1.2",
     "ts-helpers": "^1.1.1",
     "zone.js": "^0.7.2"
   },
@@ -34,7 +36,13 @@
     "@types/jasmine": "2.5.38",
     "@types/node": "^6.0.42",
     "angular-cli": "1.0.0-beta.28.3",
+    "bcryptjs": "^2.4.3",
     "codelyzer": "~2.0.0-beta.1",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^15.0.1",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^5.0.3",
+    "eslint-plugin-react": "^7.0.1",
     "jasmine-core": "2.5.2",
     "jasmine-spec-reporter": "2.5.0",
     "karma": "1.2.0",
@@ -45,6 +53,7 @@
     "protractor": "~4.0.13",
     "ts-node": "1.2.1",
     "tslint": "^4.3.0",
-    "typescript": "~2.0.3"
+    "typescript": "~2.0.3",
+    "underscore": "^1.8.3"
   }
 }
