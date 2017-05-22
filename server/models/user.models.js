@@ -43,12 +43,13 @@ const UserSchema = new Schema({
 // https://stackoverflow.com/questions/37365038/this-is-undefined-in-a-mongoose-pre-save-hook
 UserSchema.pre('save', function (next) {
   // add the date field before saving
-  const currentDate = new Date();
+  // gives us the current time in Nigeria
+  const currentDate = new Date().toLocaleString();
 
   // change the updated_at field to current date
   this.updatedAt = currentDate;
 
-  // if created_at doesn't exist, add to that field
+  // if createdAt doesn't exist, add to that field
   if (!this.createdAt) {
     this.createdAt = currentDate;
   }
@@ -105,10 +106,10 @@ UserSchema.methods = {
    * @api public
    */
   authenticate(plainText) {
-    if (!plainText || !this.hashed_password) {
+    if (!plainText || !this.password) {
       return false;
     }
-    return bcrypt.compareSync(plainText, this.hashed_password);
+    return bcrypt.compareSync(plainText, this.password);
   },
 
   /**

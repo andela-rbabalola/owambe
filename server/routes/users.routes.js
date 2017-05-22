@@ -7,4 +7,12 @@ router.route('/')
   .get(UserController.getAllUsers)
   .post(UserController.createUser);
 
+router.route('/:id')
+  .get(UserController.getUserById)
+  .put(UserController.updateUser)
+  .delete(UserController.deleteUser);
+
+router.route('/signin')
+  .post(UserController.signIn);
+
 export default router;

@@ -29,6 +29,7 @@
     "core-js": "^2.4.1",
     "express": "^4.15.3",
     "jsonwebtoken": "^7.4.1",
+    "moment": "^2.18.1",
     "mongoose": "^4.10.0",
     "rxjs": "^5.0.1",
     "toastr": "^2.1.2",
