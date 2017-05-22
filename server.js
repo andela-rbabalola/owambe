@@ -14,12 +14,12 @@ const app = express();
 
 // Parsers for POST data
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Point static path to dist
 app.use(express.static(path.join(__dirname, 'dist')));
 
-mongoose.connect('mongodb://localhost/owambe');
+mongoose.connect('mongodb://127.0.0.1/owambe');
 
 const db = mongoose.connection;
 

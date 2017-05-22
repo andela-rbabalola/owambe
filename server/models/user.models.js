@@ -1,18 +1,34 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import { isEmail } from 'validator';
+
+/* eslint func-names: 0*/
+
 const Schema = mongoose.Schema;
-const bcrypt = require('bcryptjs');
-const _ = require('underscore');
 
 const authTypes = ['twitter', 'facebook', 'google'];
 
 // create a Schema
 const UserSchema = new Schema({
-  name: String,
-  email: String,
-  username: String,
-  hashed_password: String,
-  provider: String,
-  admin: Boolean,
+  username: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    validate: [isEmail, 'invalid email'],
+    unique: true,
+    required: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  provider: {
+    type: String,
+    enum: ['twitter', 'facebook', 'google', 'local']
+  },
+  isAdmin: Boolean,
   twitter: {},
   facebook: {},
   google: {},
@@ -20,53 +36,75 @@ const UserSchema = new Schema({
   updatedAt: Date
 });
 
-/**
- * Virtuals
- */
-UserSchema.virtual('password').set((password) => {
-  this._password = password;
-  this.hashed_password = this.encryptPassword(password);
-}).get(() => {
-  return this._password;
+// add date and perform validation on name and password
+
+// I am using ES5 because of the lexical this
+// check this out for more info
+// https://stackoverflow.com/questions/37365038/this-is-undefined-in-a-mongoose-pre-save-hook
+UserSchema.pre('save', function (next) {
+  // add the date field before saving
+  const currentDate = new Date();
+
+  // change the updated_at field to current date
+  this.updatedAt = currentDate;
+
+  // if created_at doesn't exist, add to that field
+  if (!this.createdAt) {
+    this.createdAt = currentDate;
+  }
+
+  // hash password
+  this.password = this.encryptPassword(this.password);
+
+  next();
 });
 
 // the below 4 validations only apply if you are signing up traditionally
-UserSchema.path('name').validate((name) => {
+UserSchema.path('username').validate(function (username) {
   // if you are authenticating by any of the oauth strategies, don't validate
-  if (authTypes.indexOf(this.provider) !== -1) { return true; }
-  return name.length;
-}, 'Name cannot be blank');
-
-UserSchema.path('email').validate((email) => {
-  // if you are authenticating by any of the oauth strategies, don't validate
-  if (authTypes.indexOf(this.provider) !== -1) { return true; }
-  return email.length;
-}, 'Email cannot be blank');
-
-UserSchema.path('username').validate((username) => {
-  // if you are authenticating by any of the oauth strategies, don't validate
-  if (authTypes.indexOf(this.provider) !== -1) { return true; }
+  if (authTypes.indexOf(this.provider) !== -1) {
+    return true;
+  }
   return username.length;
 }, 'Username cannot be blank');
 
-UserSchema.path('hashed_password').validate((hashed_password) => {
+UserSchema.path('email').validate(function (email) {
   // if you are authenticating by any of the oauth strategies, don't validate
-  if (authTypes.indexOf(this.provider) !== -1) { return true; }
-  return hashed_password.length;
+  if (authTypes.indexOf(this.provider) !== -1) {
+    return true;
+  }
+  return email.length;
+}, 'Email cannot be blank');
+
+UserSchema.path('username').validate(function (username) {
+  // if you are authenticating by any of the oauth strategies, don't validate
+  if (authTypes.indexOf(this.provider) !== -1) {
+    return true;
+  }
+  return username.length;
+}, 'Username cannot be blank');
+
+UserSchema.path('password').validate(function (password) {
+  // if you are authenticating by any of the oauth strategies, don't validate
+  if (authTypes.indexOf(this.provider) !== -1) {
+    return true;
+  }
+  return password.length;
 }, 'Password cannot be blank');
+
 
 /**
  * Methods
  */
 UserSchema.methods = {
   /**
-   * Authenticate - check if the passwords are the same
+   * authenticate - check if the passwords are the same
    *
    * @param {String} plainText
-   * @return {Boolean}
+   * @return {Boolean} boolean
    * @api public
    */
-  authenticate: function (plainText) {
+  authenticate(plainText) {
     if (!plainText || !this.hashed_password) {
       return false;
     }
@@ -77,15 +115,17 @@ UserSchema.methods = {
    * Encrypt password
    *
    * @param {String} password
-   * @return {String}
+   * @return {String} encrypted
    * @api public
    */
-  encryptPassword: function (password) {
-    if (!password) { return ''; }
+  encryptPassword(password) {
+    if (!password) {
+      return '';
+    }
     return bcrypt.hashSync(password, bcrypt.genSaltSync(10));
   }
 };
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', UserSchema);
 
-module.exports(User);
+export default User;
