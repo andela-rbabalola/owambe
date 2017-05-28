@@ -16,10 +16,16 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+if (process.env.NODE_ENV !== 'test') {
+  // if NODE_ENV is not test use the dev db
+  mongoose.connect('mongodb://127.0.0.1/owambe');
+} else {
+  mongoose.connect('mongodb://127.0.0.1/owambe-test');
+}
+
 // Point static path to dist
 app.use(express.static(path.join(__dirname, 'dist')));
 
-mongoose.connect('mongodb://127.0.0.1/owambe');
 
 const db = mongoose.connection;
 
@@ -53,3 +59,5 @@ const server = http.createServer(app);
  */
 
 server.listen(port, () => console.log(`API running on localhost:${port}`));
+
+export default app;
