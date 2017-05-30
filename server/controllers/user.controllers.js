@@ -39,7 +39,7 @@ class UserController {
       newUser.isAdmin = false;
       newUser.save((err) => {
         if (err) {
-          return res.status(500)
+          return res.status(400)
             .send({
               success: false,
               message: 'An error occured creating the user',
@@ -57,7 +57,16 @@ class UserController {
           .send({
             success: true,
             message: 'New user created',
-            newUser,
+            newUser: {
+              __v: newUser.__v,
+              id: newUser._id,
+              username: newUser.username,
+              email: newUser.email,
+              isAdmin: newUser.isAdmin,
+              provider: newUser.provider,
+              createdAt: newUser.createdAt,
+              updatedAt: newUser.updatedAt
+            },
             token,
             expiresIn: '3 days'
           });
@@ -165,12 +174,21 @@ class UserController {
             message: 'Update failed! User not found'
           });
       }
-      // return update user
+      // return updated user
       return res.status(201)
         .send({
           success: true,
           message: 'User succesfully updated',
-          oldUser
+          oldUser: {
+            __v: oldUser.__v,
+            id: oldUser._id,
+            username: oldUser.username,
+            email: oldUser.email,
+            isAdmin: oldUser.isAdmin,
+            provider: oldUser.provider,
+            createdAt: oldUser.createdAt,
+            updatedAt: oldUser.updatedAt
+          }
         });
     });
   }
@@ -200,7 +218,16 @@ class UserController {
       return res.status(200)
         .send({
           success: true,
-          foundUser
+          foundUser: {
+            __v: foundUser.__v,
+            id: foundUser._id,
+            username: foundUser.username,
+            email: foundUser.email,
+            isAdmin: foundUser.isAdmin,
+            provider: foundUser.provider,
+            createdAt: foundUser.createdAt,
+            updatedAt: foundUser.updatedAt
+          }
         });
     });
   }

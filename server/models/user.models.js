@@ -6,6 +6,8 @@ import { isEmail } from 'validator';
 
 const Schema = mongoose.Schema;
 
+mongoose.Promise = require('bluebird');
+
 const authTypes = ['twitter', 'facebook', 'google'];
 
 // create a Schema
@@ -16,7 +18,7 @@ const UserSchema = new Schema({
   },
   email: {
     type: String,
-    validate: [isEmail, 'invalid email'],
+    validate: [{ validator: value => isEmail(value), msg: 'Invalid email.' }],
     unique: true,
     required: true
   },

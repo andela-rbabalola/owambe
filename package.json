@@ -27,6 +27,7 @@
     "babel-cli": "^6.24.1",
     "babel-register": "^6.24.1",
     "bcryptjs": "^2.4.3",
+    "bluebird": "^3.5.0",
     "body-parser": "^1.17.1",
     "chai": "^3.5.0",
     "core-js": "^2.4.1",

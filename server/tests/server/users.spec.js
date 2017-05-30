@@ -34,7 +34,6 @@ describe('Users Test Suite', () => {
           expect(res.body).to.have.property('newUser');
           expect(res.body.newUser).to.have.property('username');
           expect(res.body.newUser).to.have.property('email');
-          expect(res.body.newUser).to.have.property('password');
           done();
         });
     });
@@ -108,6 +107,67 @@ describe('Users Test Suite', () => {
         .end((error, res) => {
           expect(res.body.success).to.equal(false);
           expect(res.body.message).to.equal('Signin failed! User not found');
+          done();
+        });
+    });
+
+    it('Should validate email when creating a user', (done) => {
+      server.post('/api/users/')
+        .send({ email: 'invalid email', password: 'rotimi' })
+        .expect(400)
+        .end((error, res) => {
+          expect(res.body.success).to.equal(false);
+          expect(res.body.message).to.equal('An error occured creating the user');
+          done();
+        });
+    });
+  });
+
+  describe('Get Users', () => {
+    it('Should returns all users', (done) => {
+      server.get('/api/users')
+        .expect(200)
+        .end((error, res) => {
+          expect(res.body.users).to.be.instanceOf(Array);
+          done();
+        });
+    });
+
+    it('Should return a particular user', (done) => {
+      server.get(`/api/users/${userDetails.newUser.id}`)
+        .expect(200)
+        .end((error, res) => {
+          expect(res.body.foundUser.id).to.equal(userDetails.newUser.id);
+          expect(res.body.foundUser.username).to.equal(userDetails.newUser.username);
+          done();
+        });
+    });
+  });
+
+  describe('Update user', () => {
+    it('Should update a user', (done) => {
+      server.put(`/api/users/${userDetails.newUser.id}`)
+        .send({ username: 'updated username' })
+        .expect(201)
+        .end((error, res) => {
+          expect(res.body.message).to.equal('User succesfully updated');
+          expect(res.body.oldUser.username).to.equal('updated username');
+          done();
+        });
+    });
+  });
+
+  describe('Delete user', () => {
+    it('Should delete a user', (done) => {
+      server.delete(`/api/users/${userDetails.newUser.id}`)
+        .end((error, res) => {
+          expect(res.body.message).to.equal('User successfully deleted');
+        });
+      // Try to get user again after deleting
+      server.get(`/api/users/${userDetails.newUser.id}`)
+        .expect(404)
+        .end((error, res) => {
+          expect(res.body.message).to.equal('User not found');
           done();
         });
     });
