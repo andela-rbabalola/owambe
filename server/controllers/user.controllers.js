@@ -36,7 +36,6 @@ class UserController {
       // create user
       const newUser = new User(req.body);
       newUser.provider = 'local';
-      newUser.isAdmin = false;
       newUser.save((err) => {
         if (err) {
           return res.status(400)
