@@ -18,13 +18,13 @@ class UserController {
    */
   static createUser(req, res) {
     // check request body for username
-    User.findOne({ email: req.body.email }, (err, oldUser) => {
-      if (err) {
+    User.findOne({ email: req.body.email }, (error, oldUser) => {
+      if (error) {
         return res.status(500)
           .send({
             success: false,
             message: 'An error occured',
-            err
+            error
           });
       } else if (oldUser) {
         return res.status(409)
@@ -81,14 +81,13 @@ class UserController {
    * @return {Object} res object
    */
   static getAllUsers(req, res) {
-    // test first --> works
-    User.find({}, (err, users) => {
-      if (err) {
+    User.find({}, (error, users) => {
+      if (error) {
         return res.status(500)
           .send({
             success: false,
             message: 'An error occured getting all users',
-            err
+            error
           });
       }
 
@@ -107,13 +106,13 @@ class UserController {
    * @return {Object} res object
    */
   static signIn(req, res) {
-    User.findOne({ email: req.body.email }, (err, oldUser) => {
-      if (err) {
+    User.findOne({ email: req.body.email }, (error, oldUser) => {
+      if (error) {
         return res.status(500)
           .send({
             success: false,
             message: 'An error occured',
-            err
+            error
           });
       } else if (!oldUser) {
         // return user not found
@@ -155,17 +154,15 @@ class UserController {
    * @return {Object} res object
    */
   static updateUser(req, res) {
-    // add updatedAt field to the req body
-    req.body.updatedAt = new Date().toLocaleDateString();
-    User.findByIdAndUpdate(req.params.id, req.body, { new: true }, (err, oldUser) => {
-      if (err) {
+    User.findByIdAndUpdate(req.params.id, req.body, { new: true }, (error, updatedUser) => {
+      if (error) {
         return res.status(500)
           .send({
             success: false,
             message: 'An error occured',
-            err
+            error
           });
-      } else if (!oldUser) {
+      } else if (!updatedUser) {
         // return user not found
         return res.status(404)
           .send({
@@ -179,14 +176,14 @@ class UserController {
           success: true,
           message: 'User succesfully updated',
           oldUser: {
-            __v: oldUser.__v,
-            id: oldUser._id,
-            username: oldUser.username,
-            email: oldUser.email,
-            isAdmin: oldUser.isAdmin,
-            provider: oldUser.provider,
-            createdAt: oldUser.createdAt,
-            updatedAt: oldUser.updatedAt
+            __v: updatedUser.__v,
+            id: updatedUser._id,
+            username: updatedUser.username,
+            email: updatedUser.email,
+            isAdmin: updatedUser.isAdmin,
+            provider: updatedUser.provider,
+            createdAt: updatedUser.createdAt,
+            updatedAt: updatedUser.updatedAt
           }
         });
     });
@@ -199,13 +196,13 @@ class UserController {
    * @return {Object} res object
    */
   static getUserById(req, res) {
-    User.findById(req.params.id, (err, foundUser) => {
-      if (err) {
+    User.findById(req.params.id, (error, foundUser) => {
+      if (error) {
         return res.status(500)
           .send({
             success: false,
             message: 'An error occured',
-            err
+            error
           });
       } else if (!foundUser) {
         return res.status(404)
@@ -238,15 +235,13 @@ class UserController {
    * @return {Object} res object
    */
   static deleteUser(req, res) {
-    // first ensure user exists before deleting
-    // abstract this
-    User.findByIdAndRemove(req.params.id, (err) => {
-      if (err) {
+    User.findByIdAndRemove(req.params.id, (error) => {
+      if (error) {
         return res.status(500)
           .send({
             success: false,
             message: 'An error occured',
-            err
+            error
           });
       }
       return res.status(201)

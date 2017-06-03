@@ -5,15 +5,17 @@ const Schema = mongoose.Schema;
 mongoose.Promise = require('bluebird');
 
 const EventSchema = new Schema({
-  name: {
+  eventName: {
     type: String,
-    required: true
+    unique: true,
+    required: true,
+    trim: true
   },
-  date: {
+  eventDate: {
     type: Date,
     required: true
   },
-  location: {
+  eventLocation: {
     address: String,
     state: String,
     city: String
@@ -24,6 +26,8 @@ const EventSchema = new Schema({
     default: false
   },
   imageUrl: String
+}, {
+  timestamps: true
 });
 
 const Event = mongoose.model('Event', EventSchema);

@@ -9,6 +9,7 @@ import mongoose from 'mongoose';
 
 // Get our API routes
 import userRoute from './server/routes/users.routes';
+import eventRoute from './server/routes/events.routes';
 
 const app = express();
 
@@ -37,6 +38,7 @@ db.once('open', () => {
 
 // Set our api routes
 app.use('/api/users', userRoute);
+app.use('/api/events', eventRoute);
 
 // Catch all other routes and return the index file
 app.get('*', (req, res) => {
