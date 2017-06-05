@@ -30,12 +30,15 @@ const UserSchema = new Schema({
     type: String,
     enum: ['twitter', 'facebook', 'google', 'local']
   },
-  isAdmin: Boolean,
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
   twitter: {},
   facebook: {},
-  google: {},
-  createdAt: Date,
-  updatedAt: Date
+  google: {}
+}, {
+  timestamps: true
 });
 
 // add date and perform validation on name and password
@@ -44,21 +47,8 @@ const UserSchema = new Schema({
 // check this out for more info
 // https://stackoverflow.com/questions/37365038/this-is-undefined-in-a-mongoose-pre-save-hook
 UserSchema.pre('save', function (next) {
-  // add the date field before saving
-  // gives us the current time in Nigeria
-  const currentDate = new Date().toLocaleString();
-
-  // change the updated_at field to current date
-  this.updatedAt = currentDate;
-
-  // if createdAt doesn't exist, add to that field
-  if (!this.createdAt) {
-    this.createdAt = currentDate;
-  }
-
   // hash password
   this.password = this.encryptPassword(this.password);
-
   next();
 });
 
