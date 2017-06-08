@@ -124,11 +124,12 @@ describe('Users Test Suite', () => {
   });
 
   describe('Get Users', () => {
-    it('Should returns all users', (done) => {
+    it('Should return all users', (done) => {
       server.get('/api/users')
         .expect(200)
         .end((error, res) => {
           expect(res.body.users).to.be.instanceOf(Array);
+          expect(res.body.users.length).to.be.greaterThan(0);
           done();
         });
     });

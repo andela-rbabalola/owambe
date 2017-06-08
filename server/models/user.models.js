@@ -41,8 +41,6 @@ const UserSchema = new Schema({
   timestamps: true
 });
 
-// add date and perform validation on name and password
-
 // I am using ES5 because of the lexical this
 // check this out for more info
 // https://stackoverflow.com/questions/37365038/this-is-undefined-in-a-mongoose-pre-save-hook
