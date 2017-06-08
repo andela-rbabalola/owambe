@@ -152,7 +152,7 @@ describe('Users Test Suite', () => {
         .expect(201)
         .end((error, res) => {
           expect(res.body.message).to.equal('User succesfully updated');
-          expect(res.body.oldUser.username).to.equal('updated username');
+          expect(res.body.updatedUser.username).to.equal('updated username');
           done();
         });
     });

@@ -7,34 +7,39 @@ const server = supertest.agent(app);
 const expect = chai.expect;
 
 let eventDetails;
-const event = testHelper.event();
+let userDetails;
+
+const user = testHelper.user();
+let event;
 
 /* eslint no-underscore-dangle: 0 */
 /* eslint max-len: 0 */
 
 describe('Events Test Suite', () => {
   before((done) => {
-    server.post('/api/events')
+    server.post('/api/users')
       .type('form')
-      .send(event)
+      .send(user)
       .end((error, res) => {
-        eventDetails = res.body;
-        done();
+        userDetails = res.body;
+        event = testHelper.event(userDetails.newUser.id);
+        server.post('/api/events')
+          .send(event)
+          .end((error, res) => {
+            eventDetails = res.body;
+            done();
+          });
       });
   });
 
-  describe('Creating an event', () => {
-    const testEvent = testHelper.event();
-    const testEventNoName = testHelper.eventNoName();
-    const testEventNoDate = testHelper.eventNoDate();
-    const onlineEvent = testHelper.onlineEvent();
-    const onlineEventWithInvalidUrl = testHelper.onlineEventWithInvalidUrl();
 
+
+  describe('Creating an event', () => {
     it('Should create an event given valid details', (done) => {
       server.post('/api/events')
         .set({ 'Content-Type': 'application/x-www-form-urlencoded' })
         .type('form')
-        .send(testEvent)
+        .send(testHelper.event(userDetails.newUser.id))
         .end((error, res) => {
           expect(res.status).to.equal(201);
           expect(res.body.success).to.equal(true);
@@ -53,7 +58,7 @@ describe('Events Test Suite', () => {
 
     it('Should create an online event', (done) => {
       server.post('/api/events')
-        .send(onlineEvent)
+        .send(testHelper.onlineEvent(userDetails.newUser.id))
         .end((error, res) => {
           expect(res.body.success).to.equal(true);
           expect(res.body.message).to.equal('New event created');
@@ -69,9 +74,28 @@ describe('Events Test Suite', () => {
         });
     });
 
+    it('Should create an event with the owner defined', (done) => {
+      server.post('/api/events')
+        .send(testHelper.event(userDetails.newUser.id))
+        .end((error, res) => {
+          expect(res.body.newEvent).to.have.property('eventOwner');
+          expect(res.body.newEvent.eventOwner).to.not.equal(undefined);
+          done();
+        });
+    });
+
+    it('Should set event to public by default', (done) => {
+      server.post('/api/events')
+        .send(testHelper.event(userDetails.newUser.id))
+        .end((error, res) => {
+          expect(res.body.newEvent.isPrivate).to.equal(false);
+          done();
+        });
+    });
+
     it('Should allow only unique events to be created', (done) => {
       server.post('/api/events')
-        .send(testEvent)
+        .send(event)
         .expect(409)
         .end((err, res) => {
           expect(res.body.message.includes('already exists')).to.equal(true);
@@ -79,9 +103,30 @@ describe('Events Test Suite', () => {
         });
     });
 
+    it('Should not create an event without an owner', (done) => {
+      server.post('/api/events')
+        .send(testHelper.eventWithoutOwner())
+        .end((error, res) => {
+          expect(res.body.success).to.equal(false);
+          expect(res.body.message).to.equal('An error occured creating the event');
+          expect(res.body.err.errors.eventOwner.message).to.equal('Path `eventOwner` is required.');
+          done();
+        });
+    });
+
+    it('Should not create event without event location or event url', (done) => {
+      server.post('/api/events')
+        .send(testHelper.eventWithoutAnyAddress(userDetails.newUser.id))
+        .end((error, res) => {
+          expect(res.body.success).to.equal(false);
+          expect(res.body.message).to.equal('An error occured creating the event');
+          done();
+        });
+    });
+
     it('Should not create an event without a name', (done) => {
       server.post('/api/events')
-        .send(testEventNoName)
+        .send(testHelper.eventNoName(userDetails.newUser.id))
         .end((error, res) => {
           expect(res.body.success).to.equal(false);
           expect(res.body.message).to.equal('An error occured creating the event');
@@ -92,7 +137,7 @@ describe('Events Test Suite', () => {
 
     it('Should not create an event without a date', (done) => {
       server.post('/api/events')
-        .send(testEventNoDate)
+        .send(testHelper.eventNoDate(userDetails.newUser.id))
         .end((error, res) => {
           expect(res.body.success).to.equal(false);
           expect(res.body.message).to.equal('An error occured creating the event');
@@ -103,7 +148,7 @@ describe('Events Test Suite', () => {
 
     it('Should not create an online event with an invalid url', (done) => {
       server.post('/api/events')
-        .send(onlineEventWithInvalidUrl)
+        .send(testHelper.onlineEventWithInvalidUrl(userDetails.newUser.id))
         .end((error, res) => {
           expect(res.body.success).to.equal(false);
           expect(res.body.message).to.equal('An error occured creating the event');
@@ -114,7 +159,7 @@ describe('Events Test Suite', () => {
 
     it('Should set isOnline to false if no eventUrl is passed', (done) => {
       server.post('/api/events')
-        .send(testHelper.event())
+        .send(testHelper.event(userDetails.newUser.id))
         .end((error, res) => {
           expect(res.body.newEvent.isOnline).to.equal(false);
           done();
@@ -123,7 +168,7 @@ describe('Events Test Suite', () => {
 
     it('Should have attendees as an empty array when created', (done) => {
       server.post('/api/events')
-        .send(testHelper.event())
+        .send(testHelper.event(userDetails.newUser.id))
         .end((error, res) => {
           expect(res.body.newEvent.attendees.length).to.equal(0);
           expect(Array.isArray(res.body.newEvent.attendees)).to.equal(true);
@@ -159,6 +204,33 @@ describe('Events Test Suite', () => {
   });
 
   describe('Update event', () => {
+    // random number to append to event name
+    const number = Math.floor(Math.random() * 1000);
+    it('Should update an event', (done) => {
+      server.put(`/api/events/${eventDetails.newEvent._id}`)
+        .send({ eventName: `updated event name ${number}` })
+        .expect(201)
+        .end((error, res) => {
+          expect(res.body.message).to.equal('Event succesfully updated');
+          expect(res.body.updatedEvent.eventName).to.equal(`updated event name ${number}`);
+          done();
+        });
+    });
+  });
 
+  describe('Delete event', () => {
+    it('Should delete an event', (done) => {
+      server.delete(`/api/events/${eventDetails.newEvent._id}`)
+        .end((error, res) => {
+          expect(res.body.message).to.equal('Event successfully deleted');
+        });
+      // Try to get user again after deleting
+      server.get(`/api/events/${eventDetails.newEvent._id}`)
+        .expect(404)
+        .end((error, res) => {
+          expect(res.body.message).to.equal('Event not found');
+          done();
+        });
+    });
   });
 });
