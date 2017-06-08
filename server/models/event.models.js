@@ -37,6 +37,11 @@ const EventSchema = new Schema({
     default: false
   },
   attendees: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  eventOwner: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   isPrivate: {
     type: Boolean,
     default: false
