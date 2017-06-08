@@ -25,8 +25,7 @@ const EventSchema = new Schema({
       state: String,
       city: String,
       imageUrl: String
-    },
-    required: true,
+    }
   },
   eventUrl: {
     type: String,
@@ -56,6 +55,14 @@ EventSchema.pre('save', function (next) {
     this.isOnline = true;
   }
   next();
+});
+
+EventSchema.pre('validate', function (next) {
+  if (!this.eventInformation && !this.eventUrl) {
+    next(Error('Events must have a physical location or an online url'));
+  } else {
+    next();
+  }
 });
 
 const Event = mongoose.model('Event', EventSchema);

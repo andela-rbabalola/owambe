@@ -23,7 +23,7 @@
         "allow": [
           "req",
           "res",
-          "err"
+          "error"
         ]
       }
     ],

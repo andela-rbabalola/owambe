@@ -175,7 +175,7 @@ class UserController {
         .send({
           success: true,
           message: 'User succesfully updated',
-          oldUser: {
+          updatedUser: {
             __v: updatedUser.__v,
             id: updatedUser._id,
             username: updatedUser.username,
