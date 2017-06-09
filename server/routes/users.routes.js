@@ -12,6 +12,9 @@ router.route('/:id')
   .put(UserController.updateUser)
   .delete(UserController.deleteUser);
 
+router.route('/seed')
+  .post(UserController.seedUsers);
+
 router.route('/signin')
   .post(UserController.signIn);
 
