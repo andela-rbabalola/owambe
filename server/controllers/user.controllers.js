@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 import User from '../models/user.models';
 
 const secret = process.env.secret || 'owambe secret';
@@ -273,20 +272,26 @@ class UserController {
    * @return {Object} res object
    */
   static deleteUser(req, res) {
-    User.findByIdAndRemove(req.params.id, (error) => {
-      if (error) {
-        return res.status(500)
+    User.findById(req.params.id, (error, foundUser) => {
+      if (foundUser.isAdmin) {
+        return res.status(403)
+        .send({ message: 'The Admin cannot be deleted' });
+      }
+      User.findByIdAndRemove(req.params.id, (error) => {
+        if (error) {
+          return res.status(500)
           .send({
             success: false,
             message: 'An error occured',
             error
           });
-      }
-      return res.status(201)
+        }
+        return res.status(201)
         .send({
           success: true,
           message: 'User successfully deleted'
         });
+      });
     });
   }
 }

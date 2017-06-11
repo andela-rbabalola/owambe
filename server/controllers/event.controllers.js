@@ -1,4 +1,5 @@
 import Event from '../models/event.models';
+import controllerHelper from './helper.controllers';
 
 /**
  * This class handles database CRUD operations for events collection
@@ -92,14 +93,15 @@ class EventController {
             error
           });
       } else if (!updatedEvent) {
-        // return event not found
         return res.status(404)
           .send({
             success: false,
             message: 'Update failed! User not found'
           });
+      } else if (!controllerHelper.isOwnerOfEvent(req.decoded, updatedEvent.eventOwner)) {
+        return res.status(403)
+          .send({ success: false, message: 'Unauthorized access' });
       }
-      // return updated event
       return res.status(201)
         .send({
           success: true,
@@ -130,6 +132,9 @@ class EventController {
             success: false,
             message: 'Event not found'
           });
+      } else if (!controllerHelper.isOwnerOfEvent(req.decoded, foundEvent.eventOwner)) {
+        return res.status(403)
+          .send({ success: false, message: 'Unauthorized access' });
       }
       return res.status(200)
         .send({
@@ -146,7 +151,7 @@ class EventController {
    * @return {Object} res object
    */
   static deleteEvent(req, res) {
-    Event.findByIdAndRemove(req.params.id, (error) => {
+    Event.findByIdAndRemove(req.params.id, (error, foundEvent) => {
       if (error) {
         return res.status(500)
           .send({
@@ -154,6 +159,9 @@ class EventController {
             message: 'An error occured',
             error
           });
+      } else if (!controllerHelper.isOwnerOfEvent(req.decoded, foundEvent.eventOwner)) {
+        return res.status(403)
+          .send({ success: false, message: 'Unauthorized access' });
       }
       return res.status(201)
         .send({
