@@ -4,6 +4,8 @@ import User from '../models/user.models';
 const secret = process.env.secret || 'owambe secret';
 
 /* eslint no-underscore-dangle: 0*/
+/* eslint func-names: 0 */
+/* eslint prefer-arrow-callback: 0 */
 
 /**
  * This class handles database CRUD operations for users collection
@@ -70,6 +72,41 @@ class UserController {
             expiresIn: '3 days'
           });
       });
+    });
+  }
+
+  /**
+   * Method to seed users collection with the admin user
+   *
+   * @param {Object} req
+   * @param {Object} res
+   * @return {Object} res object
+   */
+  static seedUsers(req, res) {
+    const user = {
+      username: 'rotimi',
+      email: 'rotimi@gmail.com',
+      password: 'rotimi123',
+      isAdmin: true,
+      provider: 'local'
+    };
+
+    const adminUser = new User(user);
+    adminUser.save((err) => {
+      if (err) {
+        return res.status(400)
+          .send({
+            success: false,
+            message: 'An error occured creating the admin user',
+            err
+          });
+      }
+
+      return res.status(201)
+        .send({
+          success: true,
+          message: 'Admin user successfully created'
+        });
     });
   }
 
@@ -235,20 +272,26 @@ class UserController {
    * @return {Object} res object
    */
   static deleteUser(req, res) {
-    User.findByIdAndRemove(req.params.id, (error) => {
-      if (error) {
-        return res.status(500)
+    User.findById(req.params.id, (error, foundUser) => {
+      if (foundUser.isAdmin) {
+        return res.status(403)
+        .send({ message: 'The Admin cannot be deleted' });
+      }
+      User.findByIdAndRemove(req.params.id, (error) => {
+        if (error) {
+          return res.status(500)
           .send({
             success: false,
             message: 'An error occured',
             error
           });
-      }
-      return res.status(201)
+        }
+        return res.status(201)
         .send({
           success: true,
           message: 'User successfully deleted'
         });
+      });
     });
   }
 }
